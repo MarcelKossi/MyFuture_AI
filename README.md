@@ -1,0 +1,57 @@
+# MyFuture AI
+
+MyFuture AI is a project aimed at building a **structured, explainable academic & career guidance system**.
+
+This repository is intentionally organized as a **modular monorepo** (web frontend, backend API, AI, mobile), but **only the web frontend is implemented so far**.
+
+## Repository structure
+
+```
+MyFuture_AI/
+├── my-future-vision/   # Web frontend (Vite + React + TypeScript + Tailwind/shadcn)
+├── backend/            # Reserved for the backend API (currently empty)
+├── ai-model/           # Reserved for AI training/inference/versioning (currently empty)
+├── mobile-app/         # Reserved for the mobile app (currently empty)
+├── infra/              # Reserved for infra (Docker/CI/CD) (may be empty)
+└── docs/               # Repo-level documentation
+```
+
+## Current status
+
+- Web frontend: implemented in `my-future-vision/`.
+- Backend/AI/Mobile: folders exist and are documented, but will be added **incrementally**.
+
+## Run the web app
+
+Prerequisites:
+- Node.js 18+ (recommended)
+- npm (or bun/pnpm)
+
+From `my-future-vision/`:
+
+```sh
+npm install
+npm run dev
+```
+
+By default the dev server runs at:
+- http://localhost:8080
+
+## Documentation
+
+Repo-level docs:
+- `docs/project-architecture.md` (main architecture guide)
+- `docs/api-specs.md`, `docs/security.md`, `docs/ai-design.md` (stubs, filled progressively)
+
+Frontend-specific docs:
+- `my-future-vision/docs/cahier-des-charges.md` (requirements/spec)
+- `my-future-vision/docs/roadmap.md` (improvement roadmap)
+
+## Conventions
+
+- Documentation language: **English** (public GitHub).
+- The frontend may temporarily contain “MVP-only” logic (mock recommendations, PDF generation) until the backend/AI blocks are implemented.
+
+## License
+
+TBD.
