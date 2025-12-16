@@ -8,7 +8,7 @@ This document is a **stub**: the API is not implemented yet (`backend/` is curre
 
 Define the contract between:
 
-- `my-future-vision/` (clients)
+- `frontend/` (clients)
 - `backend/` (API)
 - `ai-model/` (scoring/recommendations)
 
@@ -26,4 +26,4 @@ Define the contract between:
 
 ## References
 
-- `my-future-vision/docs/cahier-des-charges.md`
+- `frontend/docs/cahier-des-charges.md`

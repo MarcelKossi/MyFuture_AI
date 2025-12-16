@@ -1,14 +1,14 @@
-# MyFuture AI
+# my-future-ai-vision
 
-MyFuture AI is a project aimed at building a **structured, explainable academic & career guidance system**.
+my-future-ai-vision is a project aimed at building a **structured, explainable academic & career guidance system**.
 
 This repository is intentionally organized as a **modular monorepo** (web frontend, backend API, AI, mobile), but **only the web frontend is implemented so far**.
 
 ## Repository structure
 
 ```
-MyFuture_AI/
-├── my-future-vision/   # Web frontend (Vite + React + TypeScript + Tailwind/shadcn)
+my-future-ai-vision/
+├── frontend/           # Web frontend (formerly `my-future-vision/`)
 ├── backend/            # Reserved for the backend API (currently empty)
 ├── ai-model/           # Reserved for AI training/inference/versioning (currently empty)
 ├── mobile-app/         # Reserved for the mobile app (currently empty)
@@ -18,7 +18,7 @@ MyFuture_AI/
 
 ## Current status
 
-- Web frontend: implemented in `my-future-vision/`.
+- Web frontend: implemented in `frontend/`.
 - Backend/AI/Mobile: folders exist and are documented, but will be added **incrementally**.
 
 ## Run the web app
@@ -27,7 +27,7 @@ Prerequisites:
 - Node.js 18+ (recommended)
 - npm (or bun/pnpm)
 
-From `my-future-vision/`:
+From `frontend/`:
 
 ```sh
 npm install
@@ -44,8 +44,8 @@ Repo-level docs:
 - `docs/api-specs.md`, `docs/security.md`, `docs/ai-design.md` (stubs, filled progressively)
 
 Frontend-specific docs:
-- `my-future-vision/docs/cahier-des-charges.md` (requirements/spec)
-- `my-future-vision/docs/roadmap.md` (improvement roadmap)
+- `frontend/docs/cahier-des-charges.md` (requirements/spec)
+- `frontend/docs/roadmap.md` (improvement roadmap)
 
 ## Conventions
 

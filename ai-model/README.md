@@ -20,4 +20,4 @@ Typical outputs: average, recommendations (score + explanations), model version.
 
 ## Related docs
 
-- Target AI contract: `my-future-vision/docs/cahier-des-charges.md`
+- Target AI contract: `frontend/docs/cahier-des-charges.md`

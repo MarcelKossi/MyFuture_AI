@@ -21,5 +21,5 @@ Describe:
 
 ## References
 
-- `my-future-vision/docs/cahier-des-charges.md`
-- `my-future-vision/docs/roadmap.md`
+- `frontend/docs/cahier-des-charges.md`
+- `frontend/docs/roadmap.md`
