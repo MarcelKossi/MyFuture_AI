@@ -20,4 +20,4 @@ To be defined when `backend/` is implemented:
 
 ## References
 
-- `my-future-vision/docs/cahier-des-charges.md`
+- `frontend/docs/cahier-des-charges.md`

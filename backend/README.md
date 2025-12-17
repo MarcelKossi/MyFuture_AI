@@ -9,7 +9,7 @@ This folder is **reserved** for the MyFuture AI backend.
 
 ## Boundaries
 
-- The frontend (`my-future-vision/`) should not contain the business “source of truth” once the backend exists.
+- The frontend (`frontend/`) should not contain the business “source of truth” once the backend exists.
 - AI (in `ai-model/`) should be consumed through a clear contract (internal library or separate service).
 
 ## Recommended structure (to be created incrementally)
@@ -22,5 +22,5 @@ This folder is **reserved** for the MyFuture AI backend.
 
 ## Related docs
 
-- Target scope: `my-future-vision/docs/cahier-des-charges.md`
-- Stabilization roadmap: `my-future-vision/docs/roadmap.md`
+- Target scope: `frontend/docs/cahier-des-charges.md`
+- Stabilization roadmap: `frontend/docs/roadmap.md`

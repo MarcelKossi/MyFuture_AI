@@ -35,7 +35,7 @@ A future extension may add an **LLM advisory chatbot** without changing the exis
 
 This repository is intentionally organized into **blocks** (frontend, backend, AI, mobile), but **only the web frontend is implemented** at this stage.
 
-- `my-future-vision/`: web app (Vite + React + TypeScript + Tailwind/shadcn) – **active**
+- `frontend/`: web app (Vite + React + TypeScript + Tailwind/shadcn) – **active**
 - `backend/`: **reserved** for API + persistence – currently empty
 - `ai-model/`: **reserved** for AI models/pipelines – currently empty
 - `mobile-app/`: **reserved** for the mobile app – currently empty
@@ -52,9 +52,9 @@ The project is organized into **independent but connected blocks**.
 ### 3.1 Current view (actual)
 
 ```
-MyFuture_AI/
+my-future-ai-vision/
 │
-├── my-future-vision/   # Frontend Web
+├── frontend/           # Frontend Web
 ├── backend/            # Reserved (API + business logic)
 ├── ai-model/           # Reserved (AI: training/inference)
 ├── mobile-app/         # Reserved (mobile app)
@@ -77,7 +77,7 @@ This separation provides:
 
 ---
 
-## 4. Frontend – `my-future-vision/`
+## 4. Frontend – `frontend/`
 
 ### Role
 
@@ -95,7 +95,7 @@ However, **in the current state (frontend-only MVP)**, some rules (e.g., mock re
 ### Structure (current)
 
 ```
-my-future-vision/
+frontend/
 ├── src/
 │   ├── components/     # Components (domain + shadcn UI)
 │   │   ├── orientation/  # Guidance flow
@@ -223,9 +223,9 @@ infra/
 └── ci-cd/
 ```
 
-* Docker : reproductibilité
-* Nginx : point d’entrée
-* CI/CD : automatisation
+* Docker: reproducibility
+* Nginx: entry point
+* CI/CD: automation
 
 ---
 
@@ -238,7 +238,7 @@ Technical and conceptual memory of the project.
 Documentation is split into two areas:
 
 - `docs/`: repo-level documentation (this architecture guide, stubs, conventions)
-- `my-future-vision/docs/`: frontend-specific documentation (spec, roadmap)
+- `frontend/docs/`: frontend-specific documentation (spec, roadmap)
 
 In the current state, `docs/` contains this guide, and other documents will be added incrementally.
 

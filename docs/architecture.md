@@ -6,7 +6,7 @@ This document is a **stub**. It will be completed as `backend/`, `ai-model/`, an
 
 ## Current state
 
-- The web frontend is implemented in `my-future-vision/`.
+- The web frontend is implemented in `frontend/`.
 - `backend/`, `ai-model/`, `mobile-app/` exist but are still empty.
 
 ## Target state
@@ -18,5 +18,5 @@ This document is a **stub**. It will be completed as `backend/`, `ai-model/`, an
 
 ## References
 
-- Product/spec (frontend): `my-future-vision/docs/cahier-des-charges.md`
-- Roadmap (frontend): `my-future-vision/docs/roadmap.md`
+- Product/spec (frontend): `frontend/docs/cahier-des-charges.md`
+- Roadmap (frontend): `frontend/docs/roadmap.md`
