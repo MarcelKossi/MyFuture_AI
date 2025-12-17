@@ -164,9 +164,9 @@ This folder fully isolates **Artificial Intelligence** from the rest of the syst
 
 ```
 ai-model/
-├── training/   # (optionnel au début)
-├── inference/  # service / lib d’inférence
-└── registry/   # versionnage des modèles
+├── training/   # (optional at first)
+├── inference/  # inference service / library
+└── registry/   # model versioning
 ```
 
 ---
@@ -177,8 +177,8 @@ Contains the offline training pipeline.
 
 * datasets
 * feature engineering
-* entraînement
-* évaluation
+* training
+* evaluation
 
 May be empty for the MVP.
 
@@ -188,9 +188,9 @@ May be empty for the MVP.
 
 AI service used in production.
 
-* chargement du modèle
-* prédiction
-* explicabilité
+* model loading
+* prediction
+* explainability
 
 The backend **consumes** this service; it does not implement it.
 
@@ -201,7 +201,7 @@ The backend **consumes** this service; it does not implement it.
 Versioned storage for trained models.
 
 * v1 / v2 / v3
-* métriques associées
+* associated metrics
 
 Essential for traceability and research.
 

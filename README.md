@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # my-future-ai-vision
 
 my-future-ai-vision is a project aimed at building a **structured, explainable academic & career guidance system**.
@@ -56,6 +55,4 @@ Frontend-specific docs:
 ## License
 
 TBD.
-=======
-# MyFuture_AI
->>>>>>> 675a38ec1e7f6aa29c2f80fa927040c8898ab4f7
+
