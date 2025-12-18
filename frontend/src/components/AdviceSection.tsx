@@ -2,15 +2,17 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, BookOpen, TrendingUp, Users, Lightbulb, ExternalLink } from "lucide-react";
+import PublicHeader from "@/components/PublicHeader";
 import { useTranslation } from "@/hooks/useTranslation";
 import { validateShareUrl } from "@/lib/security";
 import { toast } from "sonner";
 
 interface AdviceSectionProps {
   onBack: () => void;
+  onStartOrientation: () => void;
 }
 
-const AdviceSection = ({ onBack }: AdviceSectionProps) => {
+const AdviceSection = ({ onBack, onStartOrientation }: AdviceSectionProps) => {
   const { t } = useTranslation();
   const popularFields = [
     {
@@ -114,8 +116,10 @@ const AdviceSection = ({ onBack }: AdviceSectionProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <div className="container mx-auto px-4 py-8">
+        <PublicHeader />
+
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mt-6 mb-8">
           <Button variant="outline" onClick={onBack} className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             {t('back')}
@@ -199,7 +203,7 @@ const AdviceSection = ({ onBack }: AdviceSectionProps) => {
                 {t('advice.get_specific_recommendations')}
               </p>
               <Button 
-                onClick={onBack}
+                onClick={onStartOrientation}
                 className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
               >
                 {t('advice.start_orientation')}

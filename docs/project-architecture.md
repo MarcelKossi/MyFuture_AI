@@ -33,15 +33,15 @@ A future extension may add an **LLM advisory chatbot** without changing the exis
 
 ## 2.1 Current status (Dec 2025)
 
-This repository is intentionally organized into **blocks** (frontend, backend, AI, mobile), but **only the web frontend is implemented** at this stage.
+This repository is intentionally organized into **blocks** (frontend, backend, AI, mobile). As of Dec 2025:
 
 - `frontend/`: web app (Vite + React + TypeScript + Tailwind/shadcn) – **active**
-- `backend/`: **reserved** for API + persistence – currently empty
-- `ai-model/`: **reserved** for AI models/pipelines – currently empty
-- `mobile-app/`: **reserved** for the mobile app – currently empty
-- `docs/`: repo-level documentation (this guide + incremental stubs)
+- `backend/`: FastAPI + SQLAlchemy + Alembic – **implemented (initial MVP)**
+- `ai-model/`: placeholder for AI models/pipelines – not implemented yet
+- `mobile-app/`: placeholder for the mobile app – not implemented yet
+- `docs/`: repo-level documentation (architecture, security, API contract, etc.)
 
-Goal: **keep the repo as-is**, and **add missing files incrementally** while keeping a clean logical separation.
+Goal: keep the separation clean and evolve each block incrementally.
 
 ---
 
@@ -55,7 +55,7 @@ The project is organized into **independent but connected blocks**.
 my-future-ai-vision/
 │
 ├── frontend/           # Frontend Web
-├── backend/            # Reserved (API + business logic)
+├── backend/            # API + persistence (FastAPI)
 ├── ai-model/           # Reserved (AI: training/inference)
 ├── mobile-app/         # Reserved (mobile app)
 └── docs/               # Documentation
@@ -141,7 +141,20 @@ It provides:
 
 ### Status
 
-The `backend/` folder exists but is currently **empty**. The exact structure (Python FastAPI vs Node/Nest/Express, ORM, migrations, etc.) will be added incrementally.
+The backend is now implemented as an initial MVP using **FastAPI**, **SQLAlchemy ORM**, and **Alembic**.
+
+It currently provides:
+
+- Auth (email/password + Google token verification)
+- Email verification (expiring, single-use token stored as hash)
+- Forgot/reset password (neutral responses + token hashing + cooldown)
+- User-scoped Orientation/Result endpoints gated behind verified email
+
+See also:
+
+- `backend/README.md` (run instructions)
+- `docs/api-specs.md` (endpoint list)
+- `docs/security.md` (security posture)
 
 ### Recommended structure (generic)
 

@@ -1,41 +1,31 @@
-
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, BookOpen, Brain, ArrowRight } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
-import LanguageSelector from "@/components/LanguageSelector";
-import OrientationForm from "@/components/OrientationForm";
-import AdviceSection from "@/components/AdviceSection";
+import PublicHeader from "@/components/PublicHeader";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [selectedOption, setSelectedOption] = useState<"orientation" | "advice" | null>(null);
   const { t } = useTranslation();
   const { useRenderTimer } = usePerformanceMonitor();
+  const navigate = useNavigate();
 
   // Surveille les performances de rendu de la page
   useRenderTimer('Index');
 
-  const handleBackToHome = () => {
-    setSelectedOption(null);
+  const handleStartOrientation = () => {
+    navigate("/start-orientation");
   };
 
-  if (selectedOption === "orientation") {
-    return <OrientationForm onBack={handleBackToHome} />;
-  }
-
-  if (selectedOption === "advice") {
-    return <AdviceSection onBack={handleBackToHome} />;
-  }
+  const handleExploreAdvice = () => {
+    navigate("/explore");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Language Selector */}
-        <div className="flex justify-end mb-4">
-          <LanguageSelector />
-        </div>
+        <PublicHeader />
         
         {/* Header */}
         <div className="text-center mb-12">
@@ -64,7 +54,7 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Option 1: Orientation */}
             <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-blue-300" 
-                  onClick={() => setSelectedOption("orientation")}>
+              onClick={handleStartOrientation}>
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto p-4 bg-gradient-to-r from-blue-100 to-blue-200 rounded-full mb-4 group-hover:from-blue-200 group-hover:to-blue-300 transition-all">
                   <Brain className="h-8 w-8 text-blue-600" />
@@ -92,7 +82,7 @@ const Index = () => {
 
             {/* Option 2: Conseils */}
             <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-green-300"
-                  onClick={() => setSelectedOption("advice")}>
+              onClick={handleExploreAdvice}>
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto p-4 bg-gradient-to-r from-green-100 to-green-200 rounded-full mb-4 group-hover:from-green-200 group-hover:to-green-300 transition-all">
                   <BookOpen className="h-8 w-8 text-green-600" />

@@ -1,20 +1,33 @@
-# Architecture (stub)
+# Architecture
 
-## Status
+## Status (Dec 2025)
 
-This document is a **stub**. It will be completed as `backend/`, `ai-model/`, and `mobile-app/` are implemented.
+The repository is now a 2-tier app in practice:
+
+- `frontend/`: web client (React + Vite)
+- `backend/`: FastAPI API with SQLAlchemy + Alembic
+
+`ai-model/` and `mobile-app/` remain placeholders.
 
 ## Current state
 
-- The web frontend is implemented in `frontend/`.
-- `backend/`, `ai-model/`, `mobile-app/` exist but are still empty.
+### Frontend
 
-## Target state
+- Public routes: landing page and exploration.
+- Auth routes: login/sign-up, forgot password, reset password.
+- Protected routes (require auth): dashboard, history, results, settings, start orientation.
 
-- Web frontend: UI + data collection + result rendering.
-- Backend: auth, persistence, business logic, AI orchestration.
-- AI: training/inference/versioning.
-- Infra (optional): docker/compose, CI/CD.
+### Backend
+
+- Auth: email/password registration + login, email verification, password reset.
+- Public endpoints: placeholder lists for careers/fields/trends.
+- Protected endpoints: minimal Orientation/Result CRUD scoped to the authenticated user and gated behind verified email.
+
+## Target state (planned)
+
+- Backend becomes the “source of truth” for business rules, persistence and AI orchestration.
+- AI block provides model inference (library or separate service) consumed by the backend.
+- Infra layer (optional): containerization and CI/CD.
 
 ## References
 

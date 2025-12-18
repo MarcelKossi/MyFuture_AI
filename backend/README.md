@@ -1,26 +1,37 @@
-# Backend (reserved)
+# Backend (FastAPI)
 
-This folder is **reserved** for the MyFuture AI backend.
+Minimal FastAPI backend for MyFuture AI.
 
-## Status
+## Goals
 
-- Current: **empty** (no chosen stack / no code yet).
-- Goal: progressively host the API, business logic, persistence, and AI orchestration.
+- Runs fully locally with a **SQLite file DB** (`sqlite:///./myfuture.db` by default)
+- Designed to be **PostgreSQL-ready** (swap `MYFUTURE_DATABASE_URL` later)
+- Uses **SQLAlchemy ORM** + **Alembic migrations**
 
-## Boundaries
+## Structure
 
-- The frontend (`frontend/`) should not contain the business “source of truth” once the backend exists.
-- AI (in `ai-model/`) should be consumed through a clear contract (internal library or separate service).
+- `app/main.py`: FastAPI entrypoint
+- `app/core/`: settings & security helpers
+- `app/db/`: SQLAlchemy Base + session dependency
+- `app/models/`: ORM models (User/Orientation/Result)
+- `app/schemas/`: Pydantic schemas
+- `alembic/` + `alembic.ini`: migrations
 
-## Recommended structure (to be created incrementally)
+## Local development
 
-- `api/`: routes/controllers (thin)
-- `domain/`: business rules and use-cases
-- `infra/`: DB, external providers, technical implementations
-- `security/`: auth, permissions, rate limiting, audit
-- `tests/`: unit / contract tests
+1) Install dependencies
 
-## Related docs
+- `pip install -e .` (or install via your preferred workflow)
 
-- Target scope: `frontend/docs/cahier-des-charges.md`
-- Stabilization roadmap: `frontend/docs/roadmap.md`
+2) Run migrations
+
+- `alembic upgrade head`
+
+3) Start the API
+
+- `uvicorn app.main:app --reload --port 8000`
+
+## Environment variables
+
+- `MYFUTURE_DATABASE_URL` (default: `sqlite:///./myfuture.db`)
+- `MYFUTURE_JWT_SECRET_KEY` (default: `CHANGE_ME`)

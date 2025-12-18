@@ -10,6 +10,15 @@ Thumbs.db
 **/.next/
 **/coverage/
 
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.venv/
+**/venv/
+
 # Logs
 **/*.log
 
@@ -19,3 +28,6 @@ Thumbs.db
 
 # Misc
 **/.cache/
+
+# Local DB
+**/myfuture.db
