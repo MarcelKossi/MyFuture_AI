@@ -24,20 +24,18 @@ router = APIRouter(prefix=f"{settings.api_prefix}/auth", tags=["auth"])
 
 def _build_frontend_verify_link(*, token: str) -> str:
     base = settings.frontend_base_url.strip().rstrip("/")
-    if base.startswith("http://"):
-        base = "https://" + base.removeprefix("http://")
-    elif not (base.startswith("https://")):
-        base = "https://" + base
+    if not (base.startswith("http://") or base.startswith("https://")):
+        scheme = "http" if settings.environment == "development" else "https"
+        base = f"{scheme}://{base}"
 
     return f"{base}/verify-email?token={token}"
 
 
 def _build_frontend_reset_link(*, token: str) -> str:
     base = settings.frontend_base_url.strip().rstrip("/")
-    if base.startswith("http://"):
-        base = "https://" + base.removeprefix("http://")
-    elif not (base.startswith("https://")):
-        base = "https://" + base
+    if not (base.startswith("http://") or base.startswith("https://")):
+        scheme = "http" if settings.environment == "development" else "https"
+        base = f"{scheme}://{base}"
 
     return f"{base}/reset-password?token={token}"
 
@@ -104,17 +102,18 @@ def forgot_password(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> NeutralMessageResponse:
-    # Always return neutral message to prevent account enumeration.
+    # Always return a neutral message to prevent account enumeration.
     neutral = "If an account exists, a reset link has been sent."
 
     service = AuthService(db)
-    token = service.request_password_reset(email=str(payload.email).lower())
+    email = str(payload.email).lower()
+    token = service.request_password_reset(email=email)
     if token:
         reset_link = _build_frontend_reset_link(token=token)
         email_service = ConsoleEmailService()
         background_tasks.add_task(
             email_service.send_password_reset_email,
-            PasswordResetEmail(to_email=str(payload.email).lower(), reset_link=reset_link),
+            PasswordResetEmail(to_email=email, reset_link=reset_link),
         )
 
     return NeutralMessageResponse(message=neutral)
@@ -132,10 +131,10 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
 
 @router.post("/google", response_model=TokenResponse)
-async def google_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
+def google_login(payload: GoogleLoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     service = AuthService(db)
     try:
-        user = await service.login_with_google(id_token=payload.id_token)
+        user = service.login_with_google(id_token=payload.id_token)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc))
 

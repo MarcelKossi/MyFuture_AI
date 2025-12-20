@@ -7,8 +7,6 @@ import {
   Language, 
   SUPPORTED_LANGUAGES,
   Translations,
-  getSavedLanguage, 
-  saveLanguage, 
   loadTranslations, 
   translate,
   preloadAllTranslations 
@@ -34,8 +32,11 @@ interface TranslationProviderProps {
  * Charge les traductions de manière asynchrone et gère la persistance
  */
 export const TranslationProvider = ({ children }: TranslationProviderProps) => {
-  const { value: savedLanguage, setValue: setSavedLanguage } = useSecureLocalStorage<Language>('app-language', 'fr');
-  const [language, setCurrentLanguage] = useState<Language>(savedLanguage);
+  const {
+    value: language,
+    setValue: setSavedLanguage,
+    isLoading: isLanguageLoading,
+  } = useSecureLocalStorage<Language>('app-language', 'fr');
   const [translations, setTranslations] = useState<Translations>({});
   const [fallbackTranslations, setFallbackTranslations] = useState<Translations>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -85,10 +86,9 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
       return; // Pas de changement nécessaire
     }
 
-    setCurrentLanguage(newLanguage);
     setSavedLanguage(newLanguage);
     await loadLanguageTranslations(newLanguage);
-  }, [language, loadLanguageTranslations]);
+  }, [language, loadLanguageTranslations, setSavedLanguage]);
 
   /**
    * Fonction de traduction avec fallback automatique
@@ -104,6 +104,7 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
     let isMounted = true;
 
     const initializeTranslations = async () => {
+      if (isLanguageLoading) return;
       await loadLanguageTranslations(language);
       
       // Précharge les autres langues en arrière-plan pour améliorer les performances
@@ -119,14 +120,7 @@ export const TranslationProvider = ({ children }: TranslationProviderProps) => {
     return () => {
       isMounted = false;
     };
-  }, []); // Exécute seulement au montage
-
-  // Met à jour les traductions quand la langue change
-  useEffect(() => {
-    if (isReady) {
-      loadLanguageTranslations(language);
-    }
-  }, [language, loadLanguageTranslations, isReady]);
+  }, [isLanguageLoading, language, loadLanguageTranslations]);
 
   const contextValue: TranslationContextType = {
     language,

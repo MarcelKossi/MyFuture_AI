@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -11,37 +11,10 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/auth/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Eye, EyeOff, GraduationCap } from "lucide-react";
-
-function GoogleGIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 533.5 544.3"
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M533.5 278.4c0-17.4-1.6-34.1-4.7-50.3H272.1v95.2h146.9c-6.3 34.1-25 63-53.2 82.4v68h85.9c50.2-46.3 81.8-114.6 81.8-195.3z"
-        fill="#4285f4"
-      />
-      <path
-        d="M272.1 544.3c72.6 0 133.5-24.1 178-65.6l-85.9-68c-23.9 16.1-54.5 25.6-92.1 25.6-70.1 0-129.5-47.2-150.7-110.6H32.8v69.4c44.3 88 135.4 149.2 239.3 149.2z"
-        fill="#34a853"
-      />
-      <path
-        d="M121.4 325.7c-10.8-32.4-10.8-67.4 0-99.8v-69.4H32.8c-43 85.7-43 187.9 0 273.6l88.6-69.4z"
-        fill="#fbbc04"
-      />
-      <path
-        d="M272.1 107.7c39.5-.6 77.7 14.6 106.7 42.6l79.5-79.5C411.2 24.3 344.7-1.2 272.1 0 168.2 0 77.1 61.2 32.8 149.2l88.6 69.4c21.2-63.4 80.6-110.6 150.7-110.9z"
-        fill="#ea4335"
-      />
-    </svg>
-  );
-}
+import { initGoogleIdentity, loadGoogleIdentityScript, renderGoogleButton } from "@/auth/googleIdentity";
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,6 +22,10 @@ export default function Login() {
   const from = (location.state as { from?: string } | null)?.from || "/dashboard";
 
   const apiBaseUrl = useMemo(() => (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "", []);
+  const googleClientId = useMemo(
+    () => (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? "",
+    []
+  );
 
   const [signinEmail, setSigninEmail] = useState("");
   const [signinPassword, setSigninPassword] = useState("");
@@ -62,7 +39,86 @@ export default function Login() {
   const [signupError, setSignupError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const endpoint = (path: string) => `${apiBaseUrl}${path}`;
+  const googleBtnRef = useRef<HTMLDivElement | null>(null);
+
+  const endpoint = (path: string) => {
+    const base = apiBaseUrl.replace(/\/+$/, "");
+    if (!base) return path;
+
+    // Allow either `http://host:port` or `http://host:port/api`.
+    if (base.toLowerCase().endsWith("/api") && path.startsWith("/api/")) {
+      return `${base}${path.slice(4)}`;
+    }
+
+    return `${base}${path}`;
+  };
+
+  const handleGoogleCredential = useCallback(async (idToken: string) => {
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(endpoint("/api/auth/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_token: idToken }),
+      });
+
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as { detail?: unknown } | null;
+        const detail = typeof payload?.detail === "string" ? payload.detail : null;
+        throw new Error(detail || t("auth.google.error.backendRejected"));
+      }
+
+      const data = (await res.json().catch(() => null)) as { access_token?: string } | null;
+      if (!data?.access_token) {
+        throw new Error(t("auth.google.error.missingToken"));
+      }
+
+      login(data.access_token);
+      navigate(from, { replace: true });
+    } catch (err) {
+      toast({
+        title: t("auth.google.error.title"),
+        description: err instanceof Error ? err.message : t("auth.google.error.generic"),
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [endpoint, from, login, navigate, t]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const init = async () => {
+      if (!googleClientId) {
+        return;
+      }
+
+      try {
+        await loadGoogleIdentityScript();
+        if (!isActive) return;
+
+        initGoogleIdentity({ clientId: googleClientId, onCredential: handleGoogleCredential });
+
+        if (googleBtnRef.current) {
+          renderGoogleButton(googleBtnRef.current, { locale: language });
+        }
+      } catch {
+        // Script load/init failure: show a small toast once.
+        toast({
+          title: t("auth.google.error.title"),
+          description: t("auth.google.error.unavailable"),
+          variant: "destructive",
+        });
+      }
+    };
+
+    init();
+
+    return () => {
+      isActive = false;
+    };
+  }, [googleClientId, handleGoogleCredential, language, t]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,6 +156,12 @@ export default function Login() {
     e.preventDefault();
 
     if (signupConfirmPassword && signupConfirmPassword !== signupPassword) {
+      return;
+    }
+
+    const passwordBytes = new TextEncoder().encode(signupPassword).length;
+    if (passwordBytes > 72) {
+      setSignupError(t("auth.passwordRules.maxBytesError"));
       return;
     }
 
@@ -161,15 +223,26 @@ export default function Login() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-5">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-center gap-2 bg-white"
-                  onClick={() => toast({ title: t("auth.google.todo") })}
-                >
-                  <GoogleGIcon className="h-5 w-5" />
-                  {t("auth.google")}
-                </Button>
+                {googleClientId ? (
+                  <div className="w-full">
+                    <div ref={googleBtnRef} className="w-full flex justify-center" />
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-center bg-white"
+                    onClick={() =>
+                      toast({
+                        title: t("auth.google.error.title"),
+                        description: t("auth.google.error.missingClientId"),
+                        variant: "destructive",
+                      })
+                    }
+                  >
+                    {t("auth.google")}
+                  </Button>
+                )}
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -299,6 +372,7 @@ export default function Login() {
                             <li>{t("auth.passwordRules.lower")}</li>
                             <li>{t("auth.passwordRules.number")}</li>
                             <li>{t("auth.passwordRules.special")}</li>
+                            <li>{t("auth.passwordRules.maxBytes")}</li>
                           </ul>
                         </div>
                       </div>

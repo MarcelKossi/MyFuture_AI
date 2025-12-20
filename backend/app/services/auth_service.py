@@ -4,8 +4,6 @@ import uuid
 import secrets
 import re
 from datetime import datetime, timedelta, timezone
-
-import httpx
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,6 +19,7 @@ from app.core.security import (
     verify_password,
 )
 from app.models.user import User
+from app.services.google_id_token import verify_google_id_token
 
 
 _USERNAME_RE = re.compile(r"^[A-Za-z0-9_]{3,30}$")
@@ -86,38 +85,107 @@ class AuthService:
             raise ValueError("Invalid credentials")
         return user
 
-    async def login_with_google(self, *, id_token: str) -> User:
-        # Verify token with Google
-        async with httpx.AsyncClient(timeout=10) as client:
-            resp = await client.get(settings.google_tokeninfo_url, params={"id_token": id_token})
-        if resp.status_code != 200:
-            raise ValueError("Invalid Google token")
+    def login_with_google(self, *, id_token: str) -> User:
+        claims = verify_google_id_token(id_token)
 
-        data = resp.json()
-        email = data.get("email")
-        if not email:
-            raise ValueError("Google token missing email")
+        # If present and explicitly false, do not accept.
+        if claims.email_verified is False:
+            raise ValueError("Google email is not verified")
 
-        user = self._db.scalar(select(User).where(User.email == email))
+        now = datetime.now(timezone.utc)
+        user = self._db.scalar(select(User).where(User.email == claims.email))
+
         if user is None:
+            username = self._derive_username_from_name(claims.name) or self._generate_default_username()
             user = User(
                 id=str(uuid.uuid4()),
-                email=email,
+                username=username,
+                email=claims.email,
                 password_hash=None,
                 auth_provider="google",
                 is_verified=True,
-                verified_at=datetime.now(timezone.utc),
+                verified_at=now,
                 email_verification_token_hash=None,
                 email_verification_expires_at=None,
+                password_reset_token_hash=None,
+                password_reset_expires_at=None,
+                password_reset_requested_at=None,
             )
             self._db.add(user)
             self._db.commit()
             self._db.refresh(user)
+            return user
 
+        # Link existing account to Google (Option A).
+        if user.auth_provider != "google":
+            user.auth_provider = "google"
+
+        # Google users must not have a local password.
+        if user.password_hash is not None:
+            user.password_hash = None
+
+        # Google OAuth is considered verified.
+        if not user.is_verified:
+            user.is_verified = True
+            user.verified_at = now
+
+        # Clear any email verification / reset tokens.
+        user.email_verification_token_hash = None
+        user.email_verification_expires_at = None
+        user.password_reset_token_hash = None
+        user.password_reset_expires_at = None
+        user.password_reset_requested_at = None
+
+        # Ensure username exists.
+        if not user.username:
+            user.username = self._derive_username_from_name(claims.name) or self._generate_default_username()
+
+        self._db.add(user)
+        self._db.commit()
+        self._db.refresh(user)
         return user
 
+    def _derive_username_from_name(self, name: str | None) -> str | None:
+        if not name:
+            return None
+
+        # Convert to allowed charset: letters/numbers/underscore; collapse runs.
+        cleaned = re.sub(r"[^A-Za-z0-9]+", "_", name.strip())
+        cleaned = cleaned.strip("_")
+        if not cleaned:
+            return None
+
+        candidate = cleaned[:30]
+        if _USERNAME_RE.fullmatch(candidate) is None:
+            return None
+
+        existing = self._db.scalar(select(User).where(User.username == candidate))
+        if existing is None:
+            return candidate
+
+        # If taken, append a short suffix while keeping constraints.
+        suffix = secrets.token_hex(2)
+        base = candidate[: max(0, 30 - (1 + len(suffix)))]
+        candidate2 = f"{base}_{suffix}" if base else f"user_{suffix}"
+        if _USERNAME_RE.fullmatch(candidate2) is None:
+            return None
+
+        existing2 = self._db.scalar(select(User).where(User.username == candidate2))
+        return candidate2 if existing2 is None else None
+
     def issue_access_token(self, *, user: User) -> str:
-        return create_access_token(subject=user.id, extra_claims={"email": user.email})
+        return create_access_token(
+            subject=user.id,
+            extra_claims={
+                "user_id": user.id,
+                "email": user.email,
+                "provider": user.auth_provider,
+            },
+        )
+
+    def get_auth_provider_for_email(self, *, email: str) -> str | None:
+        user = self._db.scalar(select(User).where(User.email == email))
+        return user.auth_provider if user is not None else None
 
     def verify_email(self, *, token: str) -> None:
         token_hash = hash_email_verification_token(token)

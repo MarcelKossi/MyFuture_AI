@@ -6,6 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+*.egg-info/
+__pycache__/
+.env
+.env.*
 
 node_modules
 dist

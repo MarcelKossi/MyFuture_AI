@@ -8,18 +8,24 @@ import secrets
 import re
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 
 from app.core.config import settings
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+_BCRYPT_MAX_PASSWORD_BYTES = 72
 
 _PASSWORD_SPECIAL_RE = re.compile(r"[^A-Za-z0-9]")
 
 
 def validate_password_strength(password: str) -> None:
     # Backend must enforce rules (do not rely on frontend validation).
+    # bcrypt only uses the first 72 bytes of the password (UTF-8).
+    password_bytes = len(password.encode("utf-8"))
+    if password_bytes > _BCRYPT_MAX_PASSWORD_BYTES:
+        raise ValueError(
+            "Password is too long for bcrypt (max 72 bytes, got "
+            f"{password_bytes}). Remove emojis/hidden characters and try again."
+        )
     if len(password) < 8:
         raise ValueError("Password must be at least 8 characters")
     if re.search(r"[A-Z]", password) is None:
@@ -33,11 +39,16 @@ def validate_password_strength(password: str) -> None:
 
 
 def hash_password(password: str) -> str:
-    return _pwd_context.hash(password)
+    validate_password_strength(password)
+    hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=12))
+    return hashed.decode("utf-8")
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    return _pwd_context.verify(password, password_hash)
+    try:
+        return bcrypt.checkpw(password.encode("utf-8"), password_hash.encode("utf-8"))
+    except Exception:
+        return False
 
 
 def create_access_token(*, subject: str, extra_claims: dict[str, Any] | None = None) -> str:

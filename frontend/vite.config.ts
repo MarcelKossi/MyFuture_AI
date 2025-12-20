@@ -6,7 +6,13 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8000,
+    proxy: {
+      "/api": {
+        target: process.env.VITE_PROXY_TARGET || "http://localhost:8001",
+        changeOrigin: true,
+      },
+    },
   },
   plugins: [
     react(),
